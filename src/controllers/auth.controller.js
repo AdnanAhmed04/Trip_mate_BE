@@ -17,6 +17,7 @@ exports.register = async (req, res) => {
   const user = await User.create({ name, email, passwordHash });
 
   const token = signToken(user._id.toString());
+  console.log(token)
   res
     .cookie("token", token, { httpOnly: true, sameSite: "lax" })
     .status(201)

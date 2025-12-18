@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const authRoutes = require("./routes/auth.routes");
 const tripRoutes = require("./routes/trip.routes");
 
+require("dotenv").config();
 const app = express();
 
 app.use(express.json());
