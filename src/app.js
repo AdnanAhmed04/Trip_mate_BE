@@ -8,6 +8,15 @@ const tripRoutes = require("./routes/trip.routes");
 require("dotenv").config();
 const app = express();
 
+// ── Stripe webhook needs the RAW body, must come before express.json() ──
+const paymentCtrl = require("./controllers/payment.controller");
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  paymentCtrl.stripeWebhook
+);
+
+// ── Standard middleware ──
 app.use(express.json());
 app.use(cookieParser());
 
@@ -26,9 +35,14 @@ app.use("/api/trips", tripRoutes);
 const path = require("path");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
 const vendorRoutes = require("./routes/vendor.routes");
 app.use("/api/vendors", vendorRoutes);
 
+
+const paymentRoutes = require("./routes/payment.routes");
+app.use("/api/payments", paymentRoutes);
+
+const feedbackRoutes = require("./routes/feedback.routes");
+app.use("/api/feedbacks", feedbackRoutes);
 
 module.exports = app;

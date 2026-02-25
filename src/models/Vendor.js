@@ -39,17 +39,28 @@ const vendorSchema = new mongoose.Schema(
     aboutUs: { type: String, required: true, trim: true },
     specialOffer: { type: String, default: "", trim: true },
 
-    // ✅ ADD THESE FIELDS 👇
     budgetMin: { type: Number, default: 0 },
     budgetMax: { type: Number, default: 0 },
 
     // main location (optional, branches still work)
     city: { type: String, trim: true, default: "" },
 
+    // logo fields
+    logoUrl: { type: String, default: "" },
+    logoFileName: { type: String, default: "" },
+
+    // payment fields
+    paid: { type: Boolean, default: false },
+    stripeSessionId: { type: String, default: "" },
+    paymentIntentId: { type: String, default: "" },
+
+    // admin block
+    blocked: { type: Boolean, default: false },
+
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ["unpaid", "pending_approval", "approved", "rejected"],
+      default: "unpaid",
     },
   },
   { timestamps: true }

@@ -1,0 +1,219 @@
+{
+  "itinerary": [
+    {
+      "day": 1,
+      "dayDescription": "Arrival in Paris, iconic landmarks, and a taste of classic French dining.",
+      "weather": "Sunny, 20-25°C",
+      "morning": [
+        {
+          "placeName": "Eiffel Tower & Trocadéro Gardens",
+          "details": "Begin your Parisian adventure with breathtaking views of the Eiffel Tower from the Trocadéro Gardens. Enjoy the iconic landmark and take plenty of photos.",
+          "address": "Place du Trocadéro et du 11 Novembre, 75016 Paris, France",
+          "geoCoordinates": {
+            "lat": 48.8628,
+            "lng": 2.2875
+          },
+          "ticketPricing": "Free for views from Trocadéro. Eiffel Tower ascent: €11.30-€29.40 (Focus on exterior views for mid-budget).",
+          "timeToTravel": "Approx. 30-45 minutes by Metro from central areas.",
+          "bestTimeToVisit": "Morning for fewer crowds and good light for photos.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Trocad%C3%A9ro_as_seen_from_the_Eiffel_Tower%2C_25_September_2010.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8628,2.2875"
+        }
+      ],
+      "afternoon": [
+        {
+          "placeName": "Louvre Museum",
+          "details": "Immerse yourselves in art and history at the world's largest art museum. Focus on key masterpieces like the Mona Lisa and Venus de Milo, and explore historical sections.",
+          "address": "Rue de Rivoli, 75001 Paris, France",
+          "geoCoordinates": {
+            "lat": 48.8606,
+            "lng": 2.3376
+          },
+          "ticketPricing": "€17 per person (online booking recommended).",
+          "timeToTravel": "Approx. 15-20 minutes by Metro from the Eiffel Tower area.",
+          "bestTimeToVisit": "Afternoon, allow 3-4 hours to explore the highlights.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/6/66/Louvre_Museum_Wikimedia_Commons.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8606,2.3376"
+        }
+      ],
+      "evening": [
+        {
+          "placeName": "Dinner in Saint-Germain-des-Prés & Seine Stroll",
+          "details": "Enjoy classic French cuisine in the charming and historic Saint-Germain-des-Prés district. Afterward, take a romantic evening stroll along the Seine River, crossing Pont Neuf.",
+          "address": "Saint-Germain-des-Prés, 75006 Paris, France (general area)",
+          "geoCoordinates": {
+            "lat": 48.8538,
+            "lng": 2.334
+          },
+          "ticketPricing": "Dinner: €30-€50 per person.",
+          "timeToTravel": "Metro to Mabillon or Saint-Germain-des-Prés station.",
+          "bestTimeToVisit": "Evening.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4a/L%27Exposition_de_Paris%2C_LDUT1210%283%29%283%29.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8538,2.334"
+        }
+      ],
+      "localTips": [
+        "Purchase a 'carnet' of 10 Metro tickets for convenience and a slight discount.",
+        "Always say 'Bonjour' when entering a shop or restaurant, and 'Merci' when leaving.",
+        "Be aware of your surroundings, especially in crowded tourist areas, to avoid pickpockets."
+      ],
+      "estimatedCost": 200
+    },
+    {
+      "day": 2,
+      "dayDescription": "Discover the historical heart of Paris and explore the charming Le Marais district.",
+      "weather": "Partly Cloudy, 18-23°C",
+      "morning": [
+        {
+          "placeName": "Île de la Cité: Notre Dame Cathedral (Exterior) & Sainte-Chapelle",
+          "details": "Visit the historical island. Observe the ongoing restoration of Notre Dame from its exterior, then marvel at the exquisite stained glass windows of Sainte-Chapelle.",
+          "address": "6 Parvis Notre-Dame - Pl. Jean-Paul II, 75004 Paris, France (Notre Dame) | 8 Boulevard du Palais, 75001 Paris, France (Sainte-Chapelle)",
+          "geoCoordinates": {
+            "lat": 48.8529,
+            "lng": 2.3499
+          },
+          "ticketPricing": "Notre Dame exterior: Free. Sainte-Chapelle: €11.50 per person.",
+          "timeToTravel": "Metro to Cité station.",
+          "bestTimeToVisit": "Morning for Sainte-Chapelle to avoid the longest queues.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Notre-Dame_de_Paris%2C_4_October_2017.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8529,2.3499"
+        }
+      ],
+      "afternoon": [
+        {
+          "placeName": "Le Marais District (Place des Vosges, Jewish Quarter)",
+          "details": "Wander through Le Marais, one of Paris's oldest and most beautiful neighborhoods. Explore Place des Vosges, browse boutiques, and discover the historic Jewish Quarter with its famous falafel.",
+          "address": "Place des Vosges, 75004 Paris, France (for reference)",
+          "geoCoordinates": {
+            "lat": 48.8551,
+            "lng": 2.3634
+          },
+          "ticketPricing": "Free to explore. Food costs extra (e.g., falafel around €8-€10).",
+          "timeToTravel": "Walk from Île de la Cité (approx. 15 minutes) or Metro to Saint-Paul.",
+          "bestTimeToVisit": "Afternoon for a leisurely exploration and food stops.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Paris_Hotel_de_Sens_dsc04028.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8551,2.3634"
+        }
+      ],
+      "evening": [
+        {
+          "placeName": "Dinner in Le Marais",
+          "details": "Enjoy dinner at one of Le Marais' many charming bistros or try the famous falafel on Rue des Rosiers for a casual and delicious experience.",
+          "address": "Rue des Rosiers, 75004 Paris, France (for falafel reference)",
+          "geoCoordinates": {
+            "lat": 48.8576,
+            "lng": 2.357
+          },
+          "ticketPricing": "Dinner: €20-€40 per person (depending on choice).",
+          "timeToTravel": "Already in the area.",
+          "bestTimeToVisit": "Evening.",
+          "imageUrl": "https://placehold.co/600x400?text=Dinner%20in%20Le%20Marais%20",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8576,2.357"
+        }
+      ],
+      "localTips": [
+        "Try a traditional French crêpe from a street vendor for a sweet or savory snack.",
+        "Don't be afraid to try the local markets for fresh produce and gourmet treats.",
+        "Many smaller shops in Le Marais might close on Sundays, but falafel places are usually open."
+      ],
+      "estimatedCost": 180
+    },
+    {
+      "day": 3,
+      "dayDescription": "Explore artistic Montmartre and get some last-minute Parisian views before departure.",
+      "weather": "Sunny, 22-26°C",
+      "morning": [
+        {
+          "placeName": "Montmartre (Sacré-Cœur Basilica, Place du Tertre)",
+          "details": "Ascend to the artistic district of Montmartre. Visit the stunning Sacré-Cœur Basilica for panoramic city views and soak in the bohemian atmosphere of Place du Tertre, where artists display their work.",
+          "address": "35 Rue du Chevalier de la Barre, 75018 Paris, France (Sacré-Cœur)",
+          "geoCoordinates": {
+            "lat": 48.8867,
+            "lng": 2.3431
+          },
+          "ticketPricing": "Basilica: Free. Dome access: €7 per person. Funicular up Montmartre: Metro ticket price.",
+          "timeToTravel": "Metro to Anvers or Abbesses, then funicular or walk up.",
+          "bestTimeToVisit": "Morning for best light and to avoid peak crowds.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Le_sacre_coeur.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8867,2.3431"
+        }
+      ],
+      "afternoon": [
+        {
+          "placeName": "Palais Garnier (Opéra House) & Galeries Lafayette",
+          "details": "Admire the magnificent architecture of the Opéra Garnier (exterior or interior if time allows). Then, head to Galeries Lafayette department store for a unique shopping experience and panoramic views of Paris from its rooftop terrace.",
+          "address": "Place de l'Opéra, 75009 Paris, France (Palais Garnier) | 40 Boulevard Haussmann, 75009 Paris, France (Galeries Lafayette)",
+          "geoCoordinates": {
+            "lat": 48.8719,
+            "lng": 2.3317
+          },
+          "ticketPricing": "Opera exterior: Free. Interior tour: €14 per person. Galeries Lafayette: Free.",
+          "timeToTravel": "Metro from Montmartre to Opéra.",
+          "bestTimeToVisit": "Early afternoon before heading to the train station.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/26/Paris_Opera_full_frontal_architecture%2C_May_2009_sky.JPG",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8719,2.3317"
+        }
+      ],
+      "evening": [
+        {
+          "placeName": "Departure from Gare du Nord",
+          "details": "Head to Gare du Nord for your Eurostar journey back to London. Allow ample time for check-in and security.",
+          "address": "18 Rue de Dunkerque, 75010 Paris, France",
+          "geoCoordinates": {
+            "lat": 48.8797,
+            "lng": 2.3551
+          },
+          "ticketPricing": "Eurostar ticket (assumed pre-booked).",
+          "timeToTravel": "Metro/RER to Gare du Nord.",
+          "bestTimeToVisit": "Allow at least 90 minutes before scheduled train departure.",
+          "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/84/Gare_Nord_-_Paris_X_%28FR75%29_-_2022-01-30_-_3.jpg",
+          "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=48.8797,2.3551"
+        }
+      ],
+      "localTips": [
+        "If you're flying out, ensure you know which airport you're departing from (CDG or ORY) and plan your travel accordingly.",
+        "Consider grabbing a pain au chocolat and coffee from a local boulangerie for a quick and authentic Parisian breakfast.",
+        "Take a final moment to enjoy the city's ambiance from a café terrace."
+      ],
+      "estimatedCost": 120
+    }
+  ],
+  "hotels": [
+    {
+      "hotelName": "Hotel des Grands Hommes",
+      "address": "17 Place du Panthéon, 75005 Paris, France",
+      "price": "€180-€240 per night",
+      "geoCoordinates": {
+        "lat": 48.8465,
+        "lng": 2.3458
+      },
+      "rating": 4.1,
+      "description": "Charming hotel directly facing the Panthéon, offering a fantastic location in the heart of the Latin Quarter. Ideal for history lovers, with classic Parisian decor and excellent metro access.",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Grand_Hotel_dAngkor_SiemReap.jpg"
+    },
+    {
+      "hotelName": "Hotel Crayon Rouge by Elegancia",
+      "address": "25 Rue du Bouloi, 75001 Paris, France",
+      "price": "€170-€230 per night",
+      "geoCoordinates": {
+        "lat": 48.8631,
+        "lng": 2.3392
+      },
+      "rating": 4.2,
+      "description": "A stylish and artistic boutique hotel near the Louvre Museum and Palais Royal. Its central location makes it perfect for exploring major sights and enjoying Parisian culture.",
+      "imageUrl": "https://placehold.co/600x400?text=Hotel%20Crayon%20Rouge%20b"
+    },
+    {
+      "hotelName": "Hotel Rivoli Joli",
+      "address": "40 Rue de Rivoli, 75004 Paris, France",
+      "price": "€160-€210 per night",
+      "geoCoordinates": {
+        "lat": 48.8576,
+        "lng": 2.3524
+      },
+      "rating": 3.9,
+      "description": "Located in the vibrant Le Marais district, this hotel offers comfortable stays amidst historic streets, charming boutiques, and excellent food options. Close to Hôtel de Ville and the Seine.",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c3/West_facade_of_the_Cour_Carr%C3%A9e%2C_Louvre_Palace%2C_Paris_5_October_2017.jpg"
+    }
+  ]
+}

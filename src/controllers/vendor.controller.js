@@ -9,7 +9,10 @@ function parseJsonField(value, fallback) {
     return fallback;
   }
 }
-// registerVendor
+
+// ──────────────────────────────────────────
+// POST /api/vendors/register
+// ──────────────────────────────────────────
 exports.registerVendor = async (req, res) => {
   try {
     if (!req.file) {
@@ -50,16 +53,21 @@ exports.registerVendor = async (req, res) => {
       branches: Array.isArray(branches) ? branches : [],
       logoUrl,
       logoFileName: req.file.filename,
-      status: "pending",
+      budgetMin: Number(req.body.budgetMin) || 0,
+      budgetMax: Number(req.body.budgetMax) || 0,
+      city: req.body.city || "",
+      paid: false,
+      status: "unpaid",
     });
 
     return res.status(201).json({
-      message: "Vendor registration submitted",
+      message: "Vendor registration submitted. Please complete payment.",
       vendor: {
         id: vendor._id,
         companyName: vendor.companyName,
         email: vendor.email,
         status: vendor.status,
+        paid: vendor.paid,
         logoUrl: vendor.logoUrl,
       },
     });
@@ -70,11 +78,15 @@ exports.registerVendor = async (req, res) => {
     return res.status(500).json({ message: err.message || "Server error" });
   }
 };
-// getAllVendors
+
+// ──────────────────────────────────────────
+// GET /api/vendors
+// Public listing — only paid & non-blocked
+// ──────────────────────────────────────────
 exports.getAllVendors = async (req, res) => {
   try {
     const { status, search } = req.query;
-    const filter = {};
+    const filter = { paid: true, blocked: false };
 
     if (status) filter.status = status;
 
@@ -94,7 +106,9 @@ exports.getAllVendors = async (req, res) => {
   }
 };
 
-// ✅ DELETE /api/vendors/:id
+// ──────────────────────────────────────────
+// DELETE /api/vendors/:id
+// ──────────────────────────────────────────
 exports.deleteVendor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -111,12 +125,15 @@ exports.deleteVendor = async (req, res) => {
   }
 };
 
-// ✅ GET /api/vendors/filter
+// ──────────────────────────────────────────
+// GET /api/vendors/filter
+// Public — only paid & non-blocked
+// ──────────────────────────────────────────
 exports.filterVendors = async (req, res) => {
   try {
     const { budget, minBudget, maxBudget, location, name, status } = req.query;
 
-    const filter = {};
+    const filter = { paid: true, blocked: false };
     if (status) filter.status = status;
 
     if (name) {
@@ -150,6 +167,52 @@ exports.filterVendors = async (req, res) => {
     const vendors = await Vendor.find(filter).sort({ createdAt: -1 });
     return res.status(200).json({ total: vendors.length, vendors });
   } catch (err) {
+    return res.status(500).json({ message: err.message || "Server error" });
+  }
+};
+
+// ──────────────────────────────────────────
+// PATCH /api/vendors/:id/block
+// Admin-only — protected by ADMIN_SECRET
+// Query: ?action=block  or  ?action=unblock
+// Auth:  Authorization: Bearer <ADMIN_SECRET>
+// ──────────────────────────────────────────
+exports.adminToggleBlock = async (req, res) => {
+  try {
+    // Verify admin token
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : req.query.token;
+
+    if (!token || token !== process.env.ADMIN_SECRET) {
+      return res.status(403).json({ message: "Forbidden — invalid admin token" });
+    }
+
+    const { id } = req.params;
+    const action = req.query.action || req.body.action;
+
+    if (!["block", "unblock"].includes(action)) {
+      return res.status(400).json({ message: 'action must be "block" or "unblock"' });
+    }
+
+    const vendor = await Vendor.findById(id);
+    if (!vendor) return res.status(404).json({ message: "Vendor not found" });
+
+    vendor.blocked = action === "block";
+    await vendor.save();
+
+    return res.status(200).json({
+      message: `Vendor ${action}ed successfully`,
+      vendor: {
+        id: vendor._id,
+        companyName: vendor.companyName,
+        blocked: vendor.blocked,
+        status: vendor.status,
+      },
+    });
+  } catch (err) {
+    if (err?.name === "CastError") {
+      return res.status(400).json({ message: "Invalid vendor id" });
+    }
     return res.status(500).json({ message: err.message || "Server error" });
   }
 };

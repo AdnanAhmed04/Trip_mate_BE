@@ -11,6 +11,7 @@ exports.createTrip = async (req, res) => {
     const {
       title,
       destination,
+      origin = "",
       startDate,
       endDate,
       travelers = 1,
@@ -22,8 +23,9 @@ exports.createTrip = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const itinerary = await generateItinerary({
+    const { itinerary, hotels } = await generateItinerary({
       destination,
+      origin,
       startDate,
       endDate,
       travelers,
@@ -35,11 +37,13 @@ exports.createTrip = async (req, res) => {
       userId,
       title,
       destination,
+      origin,
       startDate,
       endDate,
       travelers,
       budgetLevel,
       interests,
+      hotels,
       itinerary,
       generatedBy: "ai",
     });
@@ -96,7 +100,7 @@ exports.updateTrip = async (req, res) => {
     }
 
     // prevent changing ownership/metadata
-    const forbidden = ["userId", "generatedBy", "_id", "createdAt", "updatedAt"];
+    const forbidden = ["userId", "_id", "createdAt", "updatedAt"];
     for (const key of forbidden) {
       if (key in req.body) delete req.body[key];
     }
