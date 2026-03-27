@@ -26,6 +26,8 @@ const vendorSchema = new mongoose.Schema(
 
     branches: { type: [branchSchema], default: [] },
 
+    serviceLocations: { type: [String], default: [] },
+
     vendorType: { type: String, required: true, trim: true },
 
     email: {
@@ -59,7 +61,7 @@ const vendorSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["unpaid", "pending_approval", "approved", "rejected"],
+      enum: ["unpaid", "pending", "pending_approval", "approved", "rejected"],
       default: "unpaid",
     },
   },

@@ -14,58 +14,161 @@ async function generateItinerary({ destination, origin, startDate, endDate, trav
   const totalDays = daysBetween(startDate, endDate);
 
   const prompt = `
-Generate a Travel Plan for Location: ${destination}, from ${origin || 'Anywhere'} from ${startDate} to ${endDate} for ${travelers} travelers with a ${budgetLevel} budget.
-Interests: ${interests.join(", ")}.
-`;
+Create a professional, detailed, realistic, and tourism-friendly travel plan in valid JSON format for the following trip:
 
-  // Define the system instruction for JSON output structure
-  const systemInstruction = `
-Return a JSON object with two keys: "hotels" and "itinerary".
+Destination: ${destination}
+Origin: ${origin || 'Anywhere'}
+Travel Dates: ${startDate} to ${endDate}
+Number of Travelers: ${travelers}
+Budget Level: ${budgetLevel}
+Interests: ${interests.join(", ")}
 
-"hotels" must be an array of recommended hotels. Each hotel must contain:
+Return only a valid JSON object with these top-level keys:
+{
+  "hotels": [],
+  "itinerary": []
+}
+
+========================
+HOTELS REQUIREMENTS
+========================
+"hotels" must be an array of recommended hotel options suitable for a ${budgetLevel} budget.
+
+Each hotel object must contain:
 {
   "hotelName": string,
   "address": string,
   "price": string,
   "geoCoordinates": { "lat": number, "lng": number },
   "rating": number,
-  "description": string
+  "description": string,
+  "uniqueFeature": string,
+  "weather": string,
+  "locationLink": string,
+  "imageUrl": string,
+  "nearbyEmergingBusinesses": [
+    {
+      "name": string,
+      "type": string,
+      "description": string,
+      "address": string,
+      "weather": string,
+      "locationLink": string,
+      "imageUrl": string
+    }
+  ]
 }
 
-"itinerary" must be an array with exactly ${totalDays} items (day 1 to ${totalDays}).
-Each day must contain:
+Hotel rules:
+- Recommend realistic and relevant hotel options
+- Mention what makes each hotel special
+- Include nearby new or emerging businesses such as cafes, startup hubs, boutique markets, co-working spaces, art spaces, food streets, or modern shopping places where relevant
+- Add a direct map-friendly "locationLink" so when the user clicks it, the place location can be opened
+- Add weather for the hotel area
+- Add a valid-looking image URL related to the hotel
+
+========================
+ITINERARY REQUIREMENTS
+========================
+"itinerary" must be an array with exactly ${totalDays} items, representing day 1 to day ${totalDays}.
+
+Each day object must contain:
 {
   "day": number,
+  "dayTitle": string,
   "dayDescription": string,
-  "weather": string, // e.g., "Sunny, 20-25°C"
+  "weather": string,
+  "uniqueHighlights": [string],
   "morning": [Place],
   "afternoon": [Place],
   "evening": [Place],
-  "localTips": [strings],
-  "estimatedCost": number
+  "localTips": [string],
+  "estimatedCost": number,
+  "dayImage": string
 }
 
 Each [Place] object must contain:
 {
   "placeName": string,
   "details": string,
-  "address": string, // accurate address
+  "address": string,
   "geoCoordinates": { "lat": number, "lng": number },
+  "locationLink": string,
   "ticketPricing": string,
   "timeToTravel": string,
-  "bestTimeToVisit": string
+  "bestTimeToVisit": string,
+  "weather": string,
+  "uniqueThing": string,
+  "imageUrl": string,
+  "relatedEmergingBusinesses": [
+    {
+      "name": string,
+      "type": string,
+      "description": string,
+      "address": string,
+      "weather": string,
+      "locationLink": string,
+      "imageUrl": string
+    }
+  ]
 }
 
-Make sure the plan is realistic for a ${budgetLevel} budget. 
-Provide real-world locations and plausible geo-coordinates.
+========================
+SPECIAL INSTRUCTIONS
+========================
+1. The itinerary must be realistic, practical, and well-structured.
+2. Include real-world places, plausible geo-coordinates, and relevant weather for the destination and each activity place.
+3. For every major place, clearly point out its unique thing, specialty, cultural importance, famous food, architecture, local vibe, or signature experience.
+4. Include image URLs for hotels, daily overview, and each important place.
+5. Include emerging or trending business spots where relevant, such as new cafes, local brands, food markets, creative spaces, shopping areas, and startup-friendly business hubs.
+6. The daily plan must flow logically by distance, timing, and traveler comfort.
+7. Make sure recommendations match a ${budgetLevel} budget.
+8. Every hotel, place, and emerging business must include a clickable "locationLink" that opens its location on map.
+9. Every hotel, place, and emerging business must include weather information for that specific area.
+10. Ensure the weather values are destination-appropriate and realistic, such as:
+   "Sunny, 30-34°C"
+   "Cloudy, 22-27°C"
+   "Rainy, 18-21°C"
+
+========================
+ARRIVAL DAY RULE
+========================
+On the first day, the dayDescription paragraph must naturally include:
+"Arrival in Lahore & Hotel Check-in"
+if the destination is Lahore.
+
+If the destination is any other city, adapt it naturally as:
+"Arrival in [Destination] & Hotel Check-in"
+
+This arrival and hotel check-in text must be included inside the dayDescription paragraph, not as a separate field.
+
+========================
+LOCATION LINK FORMAT
+========================
+For every hotel, place, and business, generate the "locationLink" in this format:
+https://www.google.com/maps?q=LAT,LNG
+
+Example:
+https://www.google.com/maps?q=31.5204,74.3587
+
+========================
+OUTPUT RULES
+========================
+- Return only valid JSON
+- Do not include markdown
+- Do not include explanations outside JSON
+- Do not omit any required fields
+- Ensure exactly ${totalDays} itinerary days
 `;
 
   try {
-    console.log("Generating itinerary with Gemini 2.5 Flash (using stable SDK)...");
+    console.log("Generating itinerary with Gemini AI...");
+
     if (!process.env.GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY is missing in process.env");
+      console.warn("GEMINI_API_KEY is not defined in environment variables.");
     }
 
+    const systemInstruction = "You are a professional travel planner. Return ONLY valid JSON that matches the requested structure precisely.";
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",
       systemInstruction: systemInstruction,
@@ -78,55 +181,71 @@ Provide real-world locations and plausible geo-coordinates.
       }
     });
 
-    console.log("Gemini response received successfully.");
     const text = result.response.text();
-    console.log("Response text length:", text.length);
+    console.log("Gemini response length:", text.length);
+
+    let jsonString = text.trim();
+    if (jsonString.startsWith('```json')) {
+      jsonString = jsonString.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+    } else if (jsonString.startsWith('```')) {
+      jsonString = jsonString.replace(/^```\n?/, '').replace(/\n?```$/, '');
+    }
 
     let json;
     try {
-      json = JSON.parse(text);
+      json = JSON.parse(jsonString);
     } catch (e) {
-      console.error("Failed to parse JSON from Gemini response. Raw text:", text);
-      throw new Error(`Failed to parse JSON from AI response: ${e.message}`);
+      console.error("Failed to parse Gemini response as JSON:", jsonString);
+      throw new Error(`JSON parsing failed: ${e.message}`);
     }
 
-    if (!json.itinerary || !Array.isArray(json.itinerary) || !json.hotels || !Array.isArray(json.hotels)) {
-      console.error("Invalid JSON structure from Gemini:", json);
-      throw new Error("Invalid format from AI (missing itinerary or hotels)");
+    if (!json.itinerary || !json.hotels) {
+      throw new Error("Invalid response format: Missing itinerary or hotels keys.");
     }
 
-    // --- Post-processing: Fetch real images ---
-    console.log("Fetching real images for itinerary...");
+    // --- Post-processing: Enhance with real-world maps and images ---
+    console.log("Enhancing travel plan with real images and verified location links...");
 
-    // 1. Fetch images for hotels
+    // Helper: Build location link from coordinates or name
+    const buildLocationLink = (item, fallbackDestination) => {
+      if (item.geoCoordinates && item.geoCoordinates.lat && item.geoCoordinates.lng) {
+        return `https://www.google.com/maps?q=${item.geoCoordinates.lat},${item.geoCoordinates.lng}`;
+      }
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.placeName || item.hotelName || item.name || "")}+${fallbackDestination}`;
+    };
+
+    // 1. Process Hotels
     for (const hotel of json.hotels) {
-      if (hotel.hotelName) {
-        hotel.imageUrl = await fetchImageForQuery(hotel.hotelName + " hotel");
-      } else {
-        hotel.imageUrl = "https://placehold.co/600x400?text=Hotel";
+      hotel.imageUrl = await fetchImageForQuery(`${hotel.hotelName} ${destination} hotel`);
+      hotel.locationLink = buildLocationLink(hotel, destination);
+
+      if (Array.isArray(hotel.nearbyEmergingBusinesses)) {
+        for (const biz of hotel.nearbyEmergingBusinesses) {
+          biz.imageUrl = await fetchImageForQuery(`${biz.name} ${biz.type || ''} ${destination}`);
+          biz.locationLink = biz.locationLink || buildLocationLink(biz, destination);
+        }
       }
     }
 
-    // 2. Fetch images for itinerary places
+    // 2. Process Itinerary
     for (const dayPlan of json.itinerary) {
-      // Process morning, afternoon, evening
-      const times = ["morning", "afternoon", "evening"];
-      for (const time of times) {
-        if (Array.isArray(dayPlan[time])) {
-          for (const place of dayPlan[time]) {
-            if (place.placeName) {
-              // Combine destination + place name for better search accuracy
-              place.imageUrl = await fetchImageForQuery(`${place.placeName} ${destination}`);
+      // Day overview image
+      dayPlan.dayImage = await fetchImageForQuery(`${dayPlan.dayTitle || destination} travel`);
 
-              // Generate Google Maps URL
-              if (place.geoCoordinates && place.geoCoordinates.lat && place.geoCoordinates.lng) {
-                place.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${place.geoCoordinates.lat},${place.geoCoordinates.lng}`;
-              } else {
-                place.googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.placeName + " " + destination)}`;
+      // Process times of day
+      const periods = ["morning", "afternoon", "evening"];
+      for (const period of periods) {
+        if (Array.isArray(dayPlan[period])) {
+          for (const place of dayPlan[period]) {
+            place.imageUrl = await fetchImageForQuery(`${place.placeName} ${destination} tourist spot`);
+            place.locationLink = buildLocationLink(place, destination);
+
+            // Related businesses for each place
+            if (Array.isArray(place.relatedEmergingBusinesses)) {
+              for (const biz of place.relatedEmergingBusinesses) {
+                biz.imageUrl = await fetchImageForQuery(`${biz.name} ${biz.type || ''} ${destination}`);
+                biz.locationLink = biz.locationLink || buildLocationLink(biz, destination);
               }
-            } else {
-              place.imageUrl = "https://placehold.co/600x400?text=Place";
-              place.googleMapsUrl = "";
             }
           }
         }
@@ -139,12 +258,8 @@ Provide real-world locations and plausible geo-coordinates.
     };
 
   } catch (err) {
-    console.error("DETAILED ITINERARY GENERATION ERROR:", err);
-    if (err.message && (err.message.includes("API key") || err.message.includes("API_KEY"))) {
-      throw new Error("Gemini API key missing or invalid.");
-    }
-    // Propagate the actual error message for better debugging
-    throw new Error(`Itinerary generation failed: ${err.message || 'Unknown error'}`);
+    console.error("CRITICAL ERROR IN ITINERARY GENERATION:", err);
+    throw new Error(`Failed to generate travel plan: ${err.message}`);
   }
 }
 
