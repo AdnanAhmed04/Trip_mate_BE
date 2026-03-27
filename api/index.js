@@ -1,25 +1,45 @@
 const app = require("../src/app");
 const connectDB = require("../src/config/db");
+const mongoose = require("mongoose");
 
 let isConnected = false;
 
 module.exports = async (req, res) => {
-  // Only connect if not already connected
+  console.log("Request path:", req.url);
+  
   if (!isConnected) {
-    if (!process.env.MONGODB_URI) {
-      console.error("MONGODB_URI is not defined in environment variables");
-      return res.status(500).json({ error: "Database configuration missing" });
+    const uri = process.env.MONGODB_URI;
+    if (!uri) {
+      console.error("❌ MONGODB_URI is missing from environment variables!");
+      return res.status(500).json({ error: "MONGODB_URI missing" });
     }
+
+    // Log the partial URI to verify it's the one we expect (hide password)
+    const maskedUri = uri.replace(/:([^@]+)@/, ":****@");
+    console.log("Connecting to:", maskedUri);
+
     try {
-      await connectDB(process.env.MONGODB_URI);
+      // Set a short timeout for the connection attempt itself
+      await connectDB(uri);
       isConnected = true;
-      console.log("MongoDB Connected in Serverless Context");
+      console.log("✅ MongoDB Connected Successfully");
     } catch (err) {
-      console.error("Failed to connect to MongoDB:", err);
-      return res.status(500).json({ error: "Database connection failed", details: err.message });
+      console.error("❌ MongoDB Connection Error:", err.message);
+      // Don't mark as connected so next request tries again
+      return res.status(500).json({ 
+        error: "Database connection failed", 
+        details: err.message,
+        uri_source: "process.env.MONGODB_URI"
+      });
     }
+  } else {
+    console.log("♻️ Using existing MongoDB connection");
   }
 
-  // Handle the request with the Express app
-  return app(req, res);
+  try {
+    return await app(req, res);
+  } catch (err) {
+    console.error("❌ App Router Error:", err.message);
+    return res.status(500).json({ error: "Internal Server Error", details: err.message });
+  }
 };
