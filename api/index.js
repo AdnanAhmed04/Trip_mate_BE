@@ -1,24 +1,25 @@
 const app = require("../src/app");
-const mongoose = require("mongoose");
+const connectDB = require("../src/config/db");
 
 let isConnected = false;
 
-const connectToDatabase = async () => {
-  if (isConnected) {
-    return;
-  }
-
-  try {
-    const db = await mongoose.connect(process.env.MONGODB_URI);
-    isConnected = db.connections[0].readyState;
-    console.log("Connected to MongoDB via Serverless Wrapper");
-  } catch (error) {
-    console.error("MongoDB connection error:", error);
-    throw error;
-  }
-};
-
 module.exports = async (req, res) => {
-  await connectToDatabase();
+  // Only connect if not already connected
+  if (!isConnected) {
+    if (!process.env.MONGODB_URI) {
+      console.error("MONGODB_URI is not defined in environment variables");
+      return res.status(500).json({ error: "Database configuration missing" });
+    }
+    try {
+      await connectDB(process.env.MONGODB_URI);
+      isConnected = true;
+      console.log("MongoDB Connected in Serverless Context");
+    } catch (err) {
+      console.error("Failed to connect to MongoDB:", err);
+      return res.status(500).json({ error: "Database connection failed", details: err.message });
+    }
+  }
+
+  // Handle the request with the Express app
   return app(req, res);
 };
