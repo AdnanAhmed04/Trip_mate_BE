@@ -24,7 +24,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN,
+    origin: ["http://localhost:3000", "https://frontend-tripmate-fyp.vercel.app"],
     credentials: true,
   })
 );
