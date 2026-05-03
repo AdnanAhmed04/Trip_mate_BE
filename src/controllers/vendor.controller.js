@@ -19,7 +19,7 @@ exports.registerVendor = async (req, res) => {
       return res.status(400).json({ message: "Company logo is required" });
     }
 
-    const { companyName, vendorType, email, aboutUs, specialOffer = "" } = req.body;
+    const { companyName, vendorType, email, phone, aboutUs, specialOffer = "" } = req.body;
 
     let services = parseJsonField(req.body.services, req.body.services);
     if (typeof services === "string") {
@@ -47,6 +47,7 @@ exports.registerVendor = async (req, res) => {
       companyName,
       vendorType,
       email,
+      phone: phone || "",
       aboutUs,
       specialOffer,
       services,

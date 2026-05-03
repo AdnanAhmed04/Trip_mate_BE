@@ -7,7 +7,8 @@ function requireAuth(req, res, next) {
       ? req.headers.authorization.slice(7)
       : null);
 
-  if (!token) return res.status(401).json({ message: "Not authenticated" });
+  console.log("token", token);
+  if (!token) return res.status(401).json({ message: "Not authenticated XDDDDDD" });
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);

@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
   res
     .cookie("token", token, { httpOnly: true, sameSite: "lax" })
     .status(201)
-    .json({ user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
+    .json({ token, user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
 };
 
 exports.login = async (req, res) => {
@@ -78,7 +78,7 @@ exports.login = async (req, res) => {
   if (email === "admin@gmail.com") {
       res
         .cookie("token", token, { httpOnly: true, sameSite: "lax" })
-        .json({ user: { id: user._id, name: user.name, email: user.email, role: 'admin', subscriptionStatus: user.subscriptionStatus } });
+        .json({ token, user: { id: user._id, name: user.name, email: user.email, role: 'admin', subscriptionStatus: user.subscriptionStatus } });
       return;
   }
 
@@ -89,7 +89,7 @@ exports.login = async (req, res) => {
 
   res
     .cookie("token", token, { httpOnly: true, sameSite: "lax" })
-    .json({ user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
+    .json({ token, user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
 };
 
 exports.me = async (req, res) => {
