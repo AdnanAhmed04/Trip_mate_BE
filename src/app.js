@@ -4,11 +4,14 @@ const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/auth.routes");
 const tripRoutes = require("./routes/trip.routes");
+const vendorRoutes = require("./routes/vendor.routes");
+const paymentRoutes = require("./routes/payment.routes");
+const feedbackRoutes = require("./routes/feedback.routes");
+const adminRoutes = require("./routes/admin.routes");
 
 require("dotenv").config();
 const app = express();
 
-// ── Stripe webhook needs the RAW body, must come before express.json() ──
 const paymentCtrl = require("./controllers/payment.controller");
 app.post(
   "/api/payments/webhook",
@@ -16,7 +19,6 @@ app.post(
   paymentCtrl.stripeWebhook
 );
 
-// ── Standard middleware ──
 app.use(express.json());
 app.use(cookieParser());
 
@@ -31,18 +33,12 @@ app.get("/health", (req, res) => res.json({ ok: true, name: "tripmate-api" }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
+app.use("/api/vendors", vendorRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/feedbacks", feedbackRoutes);
+app.use("/api/admin", adminRoutes);
 
 const path = require("path");
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-const vendorRoutes = require("./routes/vendor.routes");
-app.use("/api/vendors", vendorRoutes);
-
-
-const paymentRoutes = require("./routes/payment.routes");
-app.use("/api/payments", paymentRoutes);
-
-const feedbackRoutes = require("./routes/feedback.routes");
-app.use("/api/feedbacks", feedbackRoutes);
 
 module.exports = app;

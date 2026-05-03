@@ -1,5 +1,6 @@
 const Stripe = require("stripe");
 const Vendor = require("../models/Vendor");
+const User = require("../models/User");
 const { sendVendorRegistrationEmail } = require("../services/emailService");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -43,8 +44,8 @@ exports.createCheckoutSession = async (req, res) => {
             ],
             metadata: { vendorId: vendor._id.toString() },
             customer_email: vendor.email,
-            success_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/vendor/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/vendor/payment-cancel`,
+            success_url: `${process.env.CLIENT_ORIGIN}/vendor/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_ORIGIN}/vendor/payment-cancel`,
         });
 
         // Store the session ID on the vendor
@@ -57,6 +58,56 @@ exports.createCheckoutSession = async (req, res) => {
         return res.status(500).json({ message: err.message || "Server error" });
     }
 };
+
+/* ───────────────────────────────────────────
+   POST /api/payments/create-trip-checkout-session
+   ─────────────────────────────────────────── */
+exports.createTripCheckoutSession = async (req, res) => {
+    try {
+        const userId = req.user?.id || req.body.userId;
+        if (!userId) {
+            return res.status(400).json({ message: "userId is required" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if (user.subscriptionStatus === "paid") {
+            return res.status(400).json({ message: "User is already subscribed to paid tier" });
+        }
+
+        const amount = 150000; // 1500 in cents
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            line_items: [
+                {
+                    price_data: {
+                        currency: "usd",
+                        product_data: {
+                            name: `Trip Mate Premium Subscription`,
+                            description: `Unlimited Trips for ${user.name}`,
+                        },
+                        unit_amount: amount,
+                    },
+                    quantity: 1,
+                },
+            ],
+            metadata: { userId: user._id.toString(), type: "trip_subscription" },
+            customer_email: user.email,
+            success_url: `${process.env.CLIENT_ORIGIN}/trip-payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.CLIENT_ORIGIN}/`,
+        });
+
+        return res.status(200).json({ url: session.url, sessionId: session.id });
+    } catch (err) {
+        console.error("Stripe session error:", err.message);
+        return res.status(500).json({ message: err.message || "Server error" });
+    }
+};
+
 
 /* ───────────────────────────────────────────
    POST /api/payments/webhook
@@ -101,6 +152,21 @@ exports.stripeWebhook = async (req, res) => {
                 console.error("Webhook DB update error:", err.message);
             }
         }
+
+        const userId = session.metadata?.userId;
+        const type = session.metadata?.type;
+        if (type === "trip_subscription" && userId) {
+            try {
+                const user = await User.findById(userId);
+                if (user && user.subscriptionStatus !== "paid") {
+                    user.subscriptionStatus = "paid";
+                    await user.save();
+                    console.log(`✅ User ${userId} upgraded to paid`);
+                }
+            } catch (err) {
+                console.error("Webhook DB update error:", err.message);
+            }
+        }
     }
 
     // Always acknowledge receipt
@@ -124,6 +190,23 @@ exports.paymentSuccess = async (req, res) => {
 
         if (session.payment_status !== "paid") {
             return res.status(402).json({ message: "Payment not completed yet" });
+        }
+
+        const type = session.metadata?.type;
+        if (type === "trip_subscription") {
+            const userId = session.metadata?.userId;
+            const user = await User.findById(userId);
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            if (user.subscriptionStatus !== "paid") {
+                user.subscriptionStatus = "paid";
+                await user.save();
+                console.log(`✅ User ${userId} upgraded to paid (success-page fallback)`);
+            }
+            return res.status(200).json({
+                message: "Payment successful! Your account is upgraded.",
+                user: { id: user._id, name: user.name, subscriptionStatus: user.subscriptionStatus }
+            });
         }
 
         // 2. Find the vendor linked to this session

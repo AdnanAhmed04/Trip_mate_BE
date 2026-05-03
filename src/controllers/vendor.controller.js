@@ -32,6 +32,7 @@ exports.registerVendor = async (req, res) => {
 
     const customServices = parseJsonField(req.body.customServices, []);
     const branches = parseJsonField(req.body.branches, []);
+    const serviceLocations = parseJsonField(req.body.serviceLocations, []);
 
     if (!companyName || !vendorType || !email || !aboutUs) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -51,13 +52,14 @@ exports.registerVendor = async (req, res) => {
       services,
       customServices: Array.isArray(customServices) ? customServices : [],
       branches: Array.isArray(branches) ? branches : [],
+      serviceLocations: Array.isArray(serviceLocations) ? serviceLocations : [],
       logoUrl,
       logoFileName: req.file.filename,
       budgetMin: Number(req.body.budgetMin) || 0,
       budgetMax: Number(req.body.budgetMax) || 0,
       city: req.body.city || "",
       paid: false,
-      status: "unpaid",
+      status: "pending",
     });
 
     return res.status(201).json({
@@ -85,10 +87,8 @@ exports.registerVendor = async (req, res) => {
 // ──────────────────────────────────────────
 exports.getAllVendors = async (req, res) => {
   try {
-    const { status, search } = req.query;
-    const filter = { paid: true, blocked: false };
-
-    if (status) filter.status = status;
+    const { search } = req.query;
+    const filter = { status: "approved", blocked: false };
 
     if (search) {
       filter.$or = [
@@ -131,10 +131,9 @@ exports.deleteVendor = async (req, res) => {
 // ──────────────────────────────────────────
 exports.filterVendors = async (req, res) => {
   try {
-    const { budget, minBudget, maxBudget, location, name, status } = req.query;
-
-    const filter = { paid: true, blocked: false };
-    if (status) filter.status = status;
+    const { budget, minBudget, maxBudget, location, name } = req.query;
+ 
+    const filter = { status: "approved", blocked: false };
 
     if (name) {
       filter.companyName = { $regex: name, $options: "i" };

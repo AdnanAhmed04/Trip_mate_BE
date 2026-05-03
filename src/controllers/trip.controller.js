@@ -1,12 +1,39 @@
 // controllers/trip.controller.js
 const mongoose = require("mongoose");
 const Trip = require("../models/Trip");
+const User = require("../models/User");
 const { generateItinerary } = require("../services/itineraryGenerator");
 
 // CREATE (already yours)
 exports.createTrip = async (req, res) => {
   try {
     const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log(`[Trip Generation] User ${user.email} is currently on the '${user.subscriptionStatus || "free"}' plan.`);
+
+    if (user.subscriptionStatus !== "paid") {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const tripsToday = await Trip.countDocuments({
+        userId,
+        createdAt: { $gte: startOfDay, $lte: endOfDay }
+      });
+
+      if (tripsToday >= 1) {
+        return res.status(403).json({ 
+          code: "LIMIT_REACHED", 
+          message: "Daily limit reached. Please upgrade to a paid account." 
+        });
+      }
+    }
 
     const {
       title,
@@ -23,15 +50,21 @@ exports.createTrip = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const { itinerary, hotels } = await generateItinerary({
+    // Calculate duration
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const durationDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) || 1;
+
+    // Ensure interests is an array
+    const safeInterests = Array.isArray(interests) ? interests : [];
+
+    const { itinerary, hotels } = await generateItinerary(
       destination,
-      origin,
-      startDate,
-      endDate,
-      travelers,
+      durationDays,
       budgetLevel,
-      interests,
-    });
+      travelers,
+      safeInterests
+    );
 
     const trip = await Trip.create({
       userId,
