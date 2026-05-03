@@ -50,15 +50,21 @@ exports.createTrip = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const { itinerary, hotels } = await generateItinerary({
+    // Calculate duration
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const durationDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) || 1;
+
+    // Ensure interests is an array
+    const safeInterests = Array.isArray(interests) ? interests : [];
+
+    const { itinerary, hotels } = await generateItinerary(
       destination,
-      origin,
-      startDate,
-      endDate,
-      travelers,
+      durationDays,
       budgetLevel,
-      interests,
-    });
+      travelers,
+      safeInterests
+    );
 
     const trip = await Trip.create({
       userId,
