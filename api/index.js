@@ -1,8 +1,3 @@
-const app = require("../src/app");
-const connectDB = require("../src/config/db");
-
-let isConnected = false;
-
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:5173",
@@ -11,7 +6,12 @@ const ALLOWED_ORIGINS = [
 
 function setCorsHeaders(req, res) {
   const origin = req.headers.origin;
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.includes("localhost") || origin.includes("ngrok-free.app"))) {
+  if (
+    origin &&
+    (ALLOWED_ORIGINS.includes(origin) ||
+      origin.includes("localhost") ||
+      origin.includes("ngrok-free.app"))
+  ) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -19,13 +19,33 @@ function setCorsHeaders(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
 }
 
+let app;
+let connectDB;
+let initError = null;
+
+try {
+  app = require("../src/app");
+  connectDB = require("../src/config/db");
+} catch (e) {
+  initError = e;
+  console.error("INIT ERROR:", e.message, e.stack);
+}
+
+let isConnected = false;
+
 module.exports = async (req, res) => {
-  // Always set CORS headers first — even on errors
   setCorsHeaders(req, res);
 
-  // Handle preflight immediately
   if (req.method === "OPTIONS") {
     return res.status(204).end();
+  }
+
+  if (initError) {
+    return res.status(500).json({
+      error: "Server initialization failed",
+      message: initError.message,
+      stack: initError.stack,
+    });
   }
 
   if (!isConnected) {
@@ -37,15 +57,15 @@ module.exports = async (req, res) => {
       await connectDB(uri);
       isConnected = true;
     } catch (err) {
-      console.error("❌ MongoDB Connection Error:", err.message);
-      return res.status(500).json({ error: "Database connection failed", details: err.message });
+      console.error("DB Error:", err.message);
+      return res.status(500).json({ error: "Database connection failed", message: err.message });
     }
   }
 
   try {
     return await app(req, res);
   } catch (err) {
-    console.error("❌ App Router Error:", err.message);
-    return res.status(500).json({ error: "Internal Server Error", details: err.message });
+    console.error("App Error:", err.message);
+    return res.status(500).json({ error: "Internal Server Error", message: err.message });
   }
 };
