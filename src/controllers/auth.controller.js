@@ -27,7 +27,7 @@ exports.register = async (req, res) => {
 
   const token = signToken(user._id.toString());
   res
-    .cookie("token", token, { httpOnly: true, sameSite: "lax" })
+    .cookie("token", token, { httpOnly: true, sameSite: "none", secure: true })
     .status(201)
     .json({ token, user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
 };
@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
   
   if (email === "admin@gmail.com") {
       res
-        .cookie("token", token, { httpOnly: true, sameSite: "lax" })
+        .cookie("token", token, { httpOnly: true, sameSite: "none", secure: true })
         .json({ token, user: { id: user._id, name: user.name, email: user.email, role: 'admin', subscriptionStatus: user.subscriptionStatus } });
       return;
   }
@@ -88,7 +88,7 @@ exports.login = async (req, res) => {
   }
 
   res
-    .cookie("token", token, { httpOnly: true, sameSite: "lax" })
+    .cookie("token", token, { httpOnly: true, sameSite: "none", secure: true })
     .json({ token, user: { id: user._id, name: user.name, email: user.email, subscriptionStatus: user.subscriptionStatus } });
 };
 
