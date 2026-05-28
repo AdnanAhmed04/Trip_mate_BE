@@ -1,39 +1,45 @@
 const app = require("../src/app");
 const connectDB = require("../src/config/db");
-const mongoose = require("mongoose");
 
 let isConnected = false;
 
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://frontend-tripmate-fyp.vercel.app",
+];
+
+function setCorsHeaders(req, res) {
+  const origin = req.headers.origin;
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.includes("localhost") || origin.includes("ngrok-free.app"))) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
+}
+
 module.exports = async (req, res) => {
-  console.log("Request path:", req.url);
-  
+  // Always set CORS headers first — even on errors
+  setCorsHeaders(req, res);
+
+  // Handle preflight immediately
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
   if (!isConnected) {
     const uri = process.env.MONGODB_URI;
     if (!uri) {
-      console.error("❌ MONGODB_URI is missing from environment variables!");
       return res.status(500).json({ error: "MONGODB_URI missing" });
     }
-
-    // Log the partial URI to verify it's the one we expect (hide password)
-    const maskedUri = uri.replace(/:([^@]+)@/, ":****@");
-    console.log("Connecting to:", maskedUri);
-
     try {
-      // Set a short timeout for the connection attempt itself
       await connectDB(uri);
       isConnected = true;
-      console.log("✅ MongoDB Connected Successfully");
     } catch (err) {
       console.error("❌ MongoDB Connection Error:", err.message);
-      // Don't mark as connected so next request tries again
-      return res.status(500).json({ 
-        error: "Database connection failed", 
-        details: err.message,
-        uri_source: "process.env.MONGODB_URI"
-      });
+      return res.status(500).json({ error: "Database connection failed", details: err.message });
     }
-  } else {
-    console.log("♻️ Using existing MongoDB connection");
   }
 
   try {
