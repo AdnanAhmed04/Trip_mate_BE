@@ -221,7 +221,7 @@ OUTPUT RULES
       console.log("Generating with Gemini AI (fallback)...");
       const geminiStart = Date.now();
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.0-flash",
         systemInstruction: "You are a professional travel planner. Return ONLY valid JSON."
       });
 
