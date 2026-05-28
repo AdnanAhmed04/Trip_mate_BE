@@ -5,32 +5,25 @@
       "maxDuration": 60
     }
   },
-  "headers": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://frontend-tripmate-fyp.vercel.app" },
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,PATCH,DELETE,OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization" }
-      ]
+      "src": "/api/(.*)",
+      "methods": ["OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "https://frontend-tripmate-fyp.vercel.app",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization",
+        "Access-Control-Allow-Credentials": "true"
+      },
+      "status": 204
     },
     {
-      "source": "/health",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://frontend-tripmate-fyp.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS" }
-      ]
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     },
     {
-      "source": "/health",
-      "destination": "/api/index.js"
+      "src": "/health",
+      "dest": "/api/index.js"
     }
   ]
 }
