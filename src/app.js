@@ -57,7 +57,5 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 
-const path = require("path");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 module.exports = app;

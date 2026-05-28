@@ -1,4 +1,5 @@
 const Vendor = require("../models/Vendor");
+const { uploadToCloudinary } = require("../middleware/uploadLogo");
 
 function parseJsonField(value, fallback) {
   if (value == null || value === "") return fallback;
@@ -41,7 +42,7 @@ exports.registerVendor = async (req, res) => {
       return res.status(400).json({ message: "Select at least 1 service" });
     }
 
-    const logoUrl = `/uploads/logos/${req.file.filename}`;
+    const logoUrl = await uploadToCloudinary(req.file.buffer, "logos");
 
     const vendor = await Vendor.create({
       companyName,
@@ -55,7 +56,6 @@ exports.registerVendor = async (req, res) => {
       branches: Array.isArray(branches) ? branches : [],
       serviceLocations: Array.isArray(serviceLocations) ? serviceLocations : [],
       logoUrl,
-      logoFileName: req.file.filename,
       budgetMin: Number(req.body.budgetMin) || 0,
       budgetMax: Number(req.body.budgetMax) || 0,
       city: req.body.city || "",
