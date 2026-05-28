@@ -24,7 +24,7 @@ exports.createCheckoutSession = async (req, res) => {
             return res.status(400).json({ message: "Vendor has already paid" });
         }
 
-        const amount = Number(process.env.STRIPE_PRICE_AMOUNT) || 5000; // cents
+        const amount = Number(process.env.STRIPE_PRICE_AMOUNT) || 1200; // cents
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
@@ -77,7 +77,7 @@ exports.createTripCheckoutSession = async (req, res) => {
             return res.status(400).json({ message: "User is already subscribed to paid tier" });
         }
 
-        const amount = 150000; // 1500 in cents
+        const amount = 500; // 500 cents = $5
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],

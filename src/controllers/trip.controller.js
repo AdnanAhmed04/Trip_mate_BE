@@ -6,6 +6,7 @@ const { generateItinerary } = require("../services/itineraryGenerator");
 
 // CREATE (already yours)
 exports.createTrip = async (req, res) => {
+
   try {
     const userId = req.user.id;
 
@@ -28,9 +29,9 @@ exports.createTrip = async (req, res) => {
       });
 
       if (tripsToday >= 1) {
-        return res.status(403).json({ 
-          code: "LIMIT_REACHED", 
-          message: "Daily limit reached. Please upgrade to a paid account." 
+        return res.status(403).json({
+          code: "LIMIT_REACHED",
+          message: "Daily limit reached. Please upgrade to a paid account."
         });
       }
     }

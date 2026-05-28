@@ -37,6 +37,8 @@ const vendorSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    
+    phone: { type: String, trim: true, default: "" },
 
     aboutUs: { type: String, required: true, trim: true },
     specialOffer: { type: String, default: "", trim: true },

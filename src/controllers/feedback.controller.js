@@ -1,4 +1,5 @@
 const Feedback = require("../models/Feedback");
+const { uploadFeedbackToCloudinary } = require("../middleware/uploadFeedbackImage");
 
 exports.createFeedback = async (req, res) => {
     try {
@@ -14,8 +15,7 @@ exports.createFeedback = async (req, res) => {
 
         let imagePath = null;
         if (req.file) {
-            // Accessable via /uploads/feedbacks/filename
-            imagePath = `/uploads/feedbacks/${req.file.filename}`;
+            imagePath = await uploadFeedbackToCloudinary(req.file.buffer);
         }
 
         const newFeedback = new Feedback({

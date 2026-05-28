@@ -22,9 +22,28 @@ app.post(
 app.use(express.json());
 app.use(cookieParser());
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://frontend-tripmate-fyp.vercel.app",
+  "https://frontend-tripmate-fyp.vercel.app/"
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const isAllowed = allowedOrigins.includes(origin) ||
+        origin.includes("ngrok-free.app") ||
+        origin.includes("localhost:3000");
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -38,7 +57,5 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 
-const path = require("path");
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 module.exports = app;
