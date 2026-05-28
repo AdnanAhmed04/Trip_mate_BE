@@ -35,7 +35,7 @@ const corsOptions = {
 
 // CORS must be first — before any other middleware
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options("/(.*)", cors(corsOptions));
 
 // Stripe webhook needs raw body — register before express.json()
 const paymentCtrl = require("./controllers/payment.controller");
