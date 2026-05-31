@@ -16,6 +16,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "https://frontend-tripmate-fyp.vercel.app",
+  "https://tripmate-fyp.vercel.app",
 ];
 
 const corsOptions = {
