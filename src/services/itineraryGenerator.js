@@ -189,19 +189,11 @@ OUTPUT RULES
 
   try {
     // --- LLM GENERATION ---
+    // Fine-tuned model: https://huggingface.co/spaces/AdnanAhmed004/tripmate-ai
+    // Base: Llama 3.2 3B Instruct | Method: LoRA (rank=16) | Framework: Unsloth
+    // Training: 200 travel itinerary examples across 10 global cities
     let json;
     const llmStart = Date.now();
-
-    // NOTE: Ollama (local Llama 3.2) is skipped because it's too slow on CPU hardware.
-    // To re-enable it, uncomment the block below and comment out the Groq primary block.
-    //
-    // try {
-    //   console.log("Generating with Local Fine-Tuned Model (Ollama)...");
-    //   json = await generateItineraryWithOllama(prompt);
-    //   console.log(`✅ Ollama succeeded in ${((Date.now() - llmStart) / 1000).toFixed(1)}s`);
-    // } catch (ollamaErr) {
-    //   console.warn(`⚠️ Ollama failed: ${ollamaErr.message}`);
-    // }
 
     // 1. PRIMARY: Groq (Llama 3.3 70b — fast cloud inference)
     if (!json && process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'gsk_XXXX') {
