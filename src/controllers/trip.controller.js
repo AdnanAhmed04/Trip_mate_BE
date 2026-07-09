@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Trip = require("../models/Trip");
 const User = require("../models/User");
 const { generateItinerary } = require("../services/itineraryGenerator");
+const { findMatchingHotels } = require("./hotel.controller");
 
 // CREATE (already yours)
 exports.createTrip = async (req, res) => {
@@ -67,6 +68,22 @@ exports.createTrip = async (req, res) => {
       safeInterests
     );
 
+    // Attach real, admin-approved hotels matching this destination + budget.
+    // These are the bookable ones (booking itself is gated to paid users).
+    const matched = await findMatchingHotels(destination, budgetLevel);
+    const registeredHotels = matched.map((h) => ({
+      hotelId: h._id,
+      hotelName: h.hotelName,
+      city: h.city,
+      address: h.address,
+      description: h.description,
+      pricePerNight: h.pricePerNight,
+      budgetCategory: h.budgetCategory,
+      rating: h.rating,
+      amenities: h.amenities,
+      logoUrl: h.logoUrl,
+    }));
+
     const trip = await Trip.create({
       userId,
       title,
@@ -78,6 +95,7 @@ exports.createTrip = async (req, res) => {
       budgetLevel,
       interests,
       hotels,
+      registeredHotels,
       itinerary,
       generatedBy: "ai",
     });

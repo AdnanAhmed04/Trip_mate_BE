@@ -8,6 +8,8 @@ const vendorRoutes = require("./routes/vendor.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const feedbackRoutes = require("./routes/feedback.routes");
 const adminRoutes = require("./routes/admin.routes");
+const hotelRoutes = require("./routes/hotel.routes");
+const bookingRoutes = require("./routes/booking.routes");
 
 require("dotenv").config();
 const app = express();
@@ -56,5 +58,7 @@ app.use("/api/vendors", vendorRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/feedbacks", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/hotels", hotelRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 module.exports = app;

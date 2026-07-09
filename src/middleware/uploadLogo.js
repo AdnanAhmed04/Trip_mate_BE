@@ -18,6 +18,17 @@ const uploadLogo = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
+// Multi-image upload — used for hotel registration (max 5 images)
+const uploadHotelImages = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/"))
+      return cb(new Error("Only image files are allowed"), false);
+    cb(null, true);
+  },
+  limits: { fileSize: 5 * 1024 * 1024, files: 5 },
+});
+
 async function uploadToCloudinary(buffer, folder) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream({ folder }, (err, result) => {
@@ -28,4 +39,4 @@ async function uploadToCloudinary(buffer, folder) {
   });
 }
 
-module.exports = { uploadLogo, uploadToCloudinary };
+module.exports = { uploadLogo, uploadHotelImages, uploadToCloudinary };

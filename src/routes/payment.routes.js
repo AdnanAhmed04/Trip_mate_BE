@@ -4,6 +4,9 @@ const ctrl = require("../controllers/payment.controller");
 // Create a Stripe Checkout session for a vendor
 router.post("/create-checkout-session", ctrl.createCheckoutSession);
 
+// Create a Stripe Checkout session for a hotel
+router.post("/create-hotel-checkout-session", ctrl.createHotelCheckoutSession);
+
 // Create a Stripe Checkout session for a trip (user upgrade)
 router.post("/create-trip-checkout-session", ctrl.createTripCheckoutSession);
 

@@ -1,7 +1,8 @@
 const Stripe = require("stripe");
 const Vendor = require("../models/Vendor");
+const Hotel = require("../models/Hotel");
 const User = require("../models/User");
-const { sendVendorRegistrationEmail } = require("../services/emailService");
+const { sendVendorRegistrationEmail, sendHotelBookingEmail } = require("../services/emailService");
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -55,6 +56,50 @@ exports.createCheckoutSession = async (req, res) => {
         return res.status(200).json({ url: session.url, sessionId: session.id });
     } catch (err) {
         console.error("Stripe session error:", err.message);
+        return res.status(500).json({ message: err.message || "Server error" });
+    }
+};
+
+/* ───────────────────────────────────────────
+   POST /api/payments/create-hotel-checkout-session
+   Body: { hotelId }
+   ─────────────────────────────────────────── */
+exports.createHotelCheckoutSession = async (req, res) => {
+    try {
+        const { hotelId } = req.body;
+        if (!hotelId) return res.status(400).json({ message: "hotelId is required" });
+
+        const hotel = await Hotel.findById(hotelId);
+        if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+        if (hotel.paid) return res.status(400).json({ message: "Hotel has already paid" });
+
+        const amount = Number(process.env.STRIPE_PRICE_AMOUNT) || 1200; // same as vendor fee
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            mode: "payment",
+            line_items: [{
+                price_data: {
+                    currency: "usd",
+                    product_data: {
+                        name: `Hotel Registration — ${hotel.hotelName}`,
+                        description: `Listing fee for ${hotel.hotelName}, ${hotel.city}`,
+                    },
+                    unit_amount: amount,
+                },
+                quantity: 1,
+            }],
+            metadata: { hotelId: hotel._id.toString(), type: "hotel_registration" },
+            success_url: `${process.env.CLIENT_ORIGIN}/vendor/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url:  `${process.env.CLIENT_ORIGIN}/vendor/payment-cancel`,
+        });
+
+        hotel.stripeSessionId = session.id;
+        await hotel.save();
+
+        return res.status(200).json({ url: session.url, sessionId: session.id });
+    } catch (err) {
+        console.error("Hotel Stripe session error:", err.message);
         return res.status(500).json({ message: err.message || "Server error" });
     }
 };
@@ -167,6 +212,23 @@ exports.stripeWebhook = async (req, res) => {
                 console.error("Webhook DB update error:", err.message);
             }
         }
+
+        // Hotel registration payment
+        const hotelId = session.metadata?.hotelId;
+        if (type === "hotel_registration" && hotelId) {
+            try {
+                const hotel = await Hotel.findById(hotelId);
+                if (hotel && !hotel.paid) {
+                    hotel.paid = true;
+                    hotel.status = "pending_approval";
+                    hotel.paymentIntentId = session.payment_intent || session.id;
+                    await hotel.save();
+                    console.log(`✅ Hotel ${hotelId} marked as paid`);
+                }
+            } catch (err) {
+                console.error("Webhook hotel DB update error:", err.message);
+            }
+        }
     }
 
     // Always acknowledge receipt
@@ -214,6 +276,25 @@ exports.paymentSuccess = async (req, res) => {
         const vendor = vendorId
             ? await Vendor.findById(vendorId)
             : await Vendor.findOne({ stripeSessionId: session_id });
+
+        // Hotel registration fallback
+        const hotelId = session.metadata?.hotelId;
+        const sType   = session.metadata?.type;
+        if (sType === "hotel_registration" && hotelId) {
+            const hotel = await Hotel.findById(hotelId);
+            if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+            if (!hotel.paid) {
+                hotel.paid = true;
+                hotel.status = "pending_approval";
+                hotel.paymentIntentId = session.payment_intent || session.id;
+                await hotel.save();
+                console.log(`✅ Hotel ${hotel._id} marked as paid (success-page fallback)`);
+            }
+            return res.status(200).json({
+                message: "Payment successful! Your hotel registration is under review.",
+                hotel: { id: hotel._id, hotelName: hotel.hotelName, city: hotel.city, status: hotel.status, paid: hotel.paid },
+            });
+        }
 
         if (!vendor) {
             return res.status(404).json({ message: "Vendor not found for this session" });

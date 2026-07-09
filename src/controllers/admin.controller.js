@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Vendor = require("../models/Vendor");
+const Hotel = require("../models/Hotel");
 const SecurityLog = require("../models/SecurityLog");
 const { logSecurityEvent } = require("../services/loggingService");
 const { sendVendorApprovalEmail, sendVendorRejectionEmail } = require("../services/emailService");
@@ -158,6 +159,89 @@ exports.renewUser = async (req, res) => {
     res.json({ message: "User subscription renewed successfully", user });
   } catch (error) {
     console.error("Error renewing user:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ─── HOTEL MANAGEMENT ───────────────────────────────
+
+exports.getHotels = async (req, res) => {
+  try {
+    const hotels = await Hotel.find().sort({ createdAt: -1 });
+    const total = hotels.length;
+    const pending = hotels.filter((h) => h.status === "pending").length;
+    const approved = hotels.filter((h) => h.status === "approved").length;
+    const rejected = hotels.filter((h) => h.status === "rejected").length;
+
+    res.json({
+      stats: { total, pending, approved, rejected },
+      hotels,
+    });
+  } catch (error) {
+    console.error("Error fetching hotels:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.approveHotel = async (req, res) => {
+  try {
+    const hotel = await Hotel.findByIdAndUpdate(
+      req.params.id,
+      { status: "approved", blocked: false },
+      { new: true }
+    );
+    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+
+    await logSecurityEvent({
+      actor: req.user.email,
+      action: "HOTEL_APPROVED",
+      target: req.params.id,
+      severity: "INFO",
+      req,
+    });
+    res.json({ message: "Hotel approved successfully", hotel });
+  } catch (error) {
+    console.error("Error approving hotel:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.rejectHotel = async (req, res) => {
+  try {
+    const hotel = await Hotel.findByIdAndUpdate(
+      req.params.id,
+      { status: "rejected", blocked: true },
+      { new: true }
+    );
+    if (!hotel) return res.status(404).json({ message: "Hotel not found" });
+
+    await logSecurityEvent({
+      actor: req.user.email,
+      action: "HOTEL_REJECTED",
+      target: req.params.id,
+      severity: "WARN",
+      req,
+    });
+    res.json({ message: "Hotel rejected", hotel });
+  } catch (error) {
+    console.error("Error rejecting hotel:", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.deleteHotel = async (req, res) => {
+  try {
+    await Hotel.findByIdAndDelete(req.params.id);
+    await logSecurityEvent({
+      actor: req.user.email,
+      action: "HOTEL_DELETED",
+      target: req.params.id,
+      severity: "WARN",
+      req,
+    });
+    res.json({ message: "Hotel deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting hotel:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };

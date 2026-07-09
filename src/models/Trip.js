@@ -49,6 +49,24 @@ const tripSchema = new mongoose.Schema(
     travelers: { type: Number, default: 1 },
     interests: { type: [String], default: [] },
     hotels: [hotelSchema],
+    // Real, admin-approved hotels matched by city + budget (bookable)
+    registeredHotels: {
+      type: [
+        {
+          hotelId: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel" },
+          hotelName: String,
+          city: String,
+          address: String,
+          description: String,
+          pricePerNight: Number,
+          budgetCategory: String,
+          rating: Number,
+          amenities: [String],
+          logoUrl: String,
+        },
+      ],
+      default: [],
+    },
     itinerary: { type: [itineraryItemSchema], default: [] },
     generatedBy: { type: String, enum: ["ai", "rules", "manual"], default: "ai" },
   },

@@ -53,4 +53,16 @@ router.delete("/users/:id", adminController.deleteUser);
 router.post("/users/:id/renew", adminController.renewUser);
 router.get("/security-logs", adminController.getSecurityLogs);
 
+// Hotel management
+router.get("/hotels", adminController.getHotels);
+router.post("/hotels/:id/approve", adminController.approveHotel);
+router.post("/hotels/:id/reject", adminController.rejectHotel);
+router.delete("/hotels/:id", adminController.deleteHotel);
+
+// Booking management
+const bookingCtrl = require("../controllers/booking.controller");
+router.get("/bookings",               bookingCtrl.getAllBookings);
+router.post("/bookings/:id/confirm",  bookingCtrl.confirmBooking);
+router.post("/bookings/:id/reject",   bookingCtrl.rejectBooking);
+
 module.exports = router;
