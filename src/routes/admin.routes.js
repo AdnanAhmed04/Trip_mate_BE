@@ -59,6 +59,10 @@ router.post("/hotels/:id/approve", adminController.approveHotel);
 router.post("/hotels/:id/reject", adminController.rejectHotel);
 router.delete("/hotels/:id", adminController.deleteHotel);
 
+// Vendor logo upload (admin can upload logo for any vendor)
+const { uploadLogo } = require("../middleware/uploadLogo");
+router.post("/vendors/:id/logo", uploadLogo.single("logo"), adminController.uploadVendorLogo);
+
 // Booking management
 const bookingCtrl = require("../controllers/booking.controller");
 router.get("/bookings",               bookingCtrl.getAllBookings);

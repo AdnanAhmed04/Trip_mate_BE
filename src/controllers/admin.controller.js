@@ -4,6 +4,7 @@ const Hotel = require("../models/Hotel");
 const SecurityLog = require("../models/SecurityLog");
 const { logSecurityEvent } = require("../services/loggingService");
 const { sendVendorApprovalEmail, sendVendorRejectionEmail } = require("../services/emailService");
+const { uploadToCloudinary } = require("../middleware/uploadLogo");
 
 exports.getVendors = async (req, res) => {
   try {
@@ -292,5 +293,48 @@ exports.rejectVendor = async (req, res) => {
   } catch (error) {
     console.error("Error rejecting vendor:", error);
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// ─── VENDOR LOGO UPLOAD (Admin) ─────────────────────────────
+
+exports.uploadVendorLogo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const vendor = await Vendor.findById(id);
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    // Upload to Cloudinary
+    const logoUrl = await uploadToCloudinary(req.file.buffer, "vendor-logos");
+
+    // Update vendor document
+    vendor.logoUrl = logoUrl;
+    vendor.logoFileName = req.file.originalname;
+    await vendor.save();
+
+    await logSecurityEvent({
+      actor: req.user.email,
+      action: "VENDOR_LOGO_UPLOADED",
+      target: id,
+      severity: "INFO",
+      details: { vendorName: vendor.companyName, fileName: req.file.originalname },
+      req,
+    });
+
+    res.json({
+      message: "Logo uploaded successfully",
+      logoUrl,
+      vendor,
+    });
+  } catch (error) {
+    console.error("Error uploading vendor logo:", error);
+    res.status(500).json({ message: "Failed to upload logo: " + error.message });
   }
 };
